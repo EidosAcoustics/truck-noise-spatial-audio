@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+  <title>ARUCO Spatial Audio Prototype</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link
+    rel="stylesheet"
+    href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+  <!-- ============================== -->
+  <!-- CAMERA                         -->
+  <!-- ============================== -->
+
+  <video
+    id="video"
+    autoplay
+    playsinline>
+  </video>
+
+
+  <!-- ============================== -->
+  <!-- CANVAS                         -->
+  <!-- ============================== -->
+
+  <canvas
+    id="canvas">
+  </canvas>
+
+
+  <!-- ============================== -->
+  <!-- STATUS                         -->
+  <!-- ============================== -->
+
+  <div id="status">
+
+  </div>
+
+
+  <!-- ============================== -->
+  <!-- PANNEAU DES MARQUEURS          -->
+  <!-- (une ligne par marqueur,       -->
+  <!-- générée par js/main.js)        -->
+  <!-- ============================== -->
+
+  <div id="markersPanel">
+
+  </div>
+
+
+  <!-- ============================== -->
+  <!-- BOUTON LISTEN                  -->
+  <!-- ============================== -->
+
+<div id="audioControls">
+
+  <button
+    id="listenButton"
+    disabled>
+
+    <span class="btnIcon">▶</span>
+    <span class="btnLabel">Listen</span>
+
+  </button>
+
+  <button
+    id="stopButton"
+    disabled>
+
+    <span class="btnIcon">■</span>
+    <span class="btnLabel">Stop</span>
+
+  </button>
+
+</div>
+
+
+  <!-- ============================== -->
+  <!-- Les fichiers audio ne sont plus -->
+  <!-- déclarés ici : chaque marqueur  -->
+  <!-- crée sa propre source en JS,    -->
+  <!-- voir js/markersConfig.js        -->
+  <!-- ============================== -->
+
+
+  <!-- ============================== -->
+  <!-- JS-ARUCO2                     -->
+  <!-- ============================== -->
+
+  <script src="https://cdn.jsdelivr.net/gh/damianofalcioni/js-aruco2@master/src/cv.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/gh/damianofalcioni/js-aruco2@master/src/aruco.js"></script>
+
+
+  <!-- ============================== -->
+  <!-- APPLICATION (ES MODULES)       -->
+  <!-- ============================== -->
+
+  <script
+    type="module"
+    src="js/main.js">
+  </script>
+
+
+</body>
+
+</html>

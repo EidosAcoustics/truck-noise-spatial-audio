@@ -1,0 +1,517 @@
+/* ==========================================
+   TOKENS
+   ========================================== */
+
+:root {
+
+  /* Surfaces */
+  --panel-bg: rgba(14, 17, 19, 0.86);
+  --panel-border: rgba(255, 255, 255, 0.09);
+  --panel-border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Texte */
+  --ink: #ECEEEA;
+  --ink-dim: #9BA3A0;
+  --ink-faint: #5C6461;
+
+  /* États de mesure (sémantique, cohérente
+     dans tout le HUD : anneau, texte, bordures) */
+  --state-idle: #4B524F;
+  --state-measuring: #E8A23D;
+  --state-validated: #45D6A6;
+  --state-error: #E8654A;
+  --state-listening: #4FC7E0;
+
+  /* Typo */
+  --font-display: "Space Grotesk", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+
+}
+
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  background: #05070A;
+
+  font-family: var(--font-display);
+
+  color: var(--ink);
+}
+
+
+/* ============================== */
+/* VIDEO CAMERA                   */
+/* ============================== */
+
+#video {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* ============================== */
+/* CANVAS                         */
+/* ============================== */
+
+#canvas {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+}
+
+
+/* ============================== */
+/* STATUS — bandeau d'erreur      */
+/* (caché par défaut, affiché     */
+/* uniquement si la caméra échoue)*/
+/* ============================== */
+
+#status {
+  display: none;
+
+  position: absolute;
+
+  top: 18px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  padding: 10px 22px;
+
+  background: var(--panel-bg);
+
+  border: 1px solid var(--state-error);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+
+  color: var(--state-error);
+
+  border-radius: 999px;
+
+  z-index: 10;
+
+  text-align: center;
+
+  white-space: nowrap;
+}
+
+
+/* ============================== */
+/* PANNEAU DES MARQUEURS          */
+/* ============================== */
+
+#markersPanel {
+  position: absolute;
+
+  top: 68px;
+
+  left: 16px;
+
+  right: 16px;
+
+  max-height: 46vh;
+
+  overflow-y: auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  z-index: 10;
+}
+
+
+/* ============================== */
+/* LIGNE D'UN MARQUEUR            */
+/* ============================== */
+
+.markerRow {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 10px 14px;
+
+  background: var(--panel-bg);
+
+  border: 1px solid var(--panel-border);
+
+  border-radius: 12px;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  max-width: 320px;
+
+  transition: border-color 0.25s ease;
+
+  animation: rowEnter 0.22s ease-out;
+}
+
+
+@keyframes rowEnter {
+
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+  .markerRow {
+    animation: none;
+  }
+
+}
+
+
+.markerRow[data-state="measuring"] {
+  border-color: rgba(232, 162, 61, 0.45);
+}
+
+.markerRow[data-state="validated"] {
+  border-color: rgba(69, 214, 166, 0.45);
+}
+
+.markerRow[data-state="error"] {
+  border-color: rgba(232, 101, 74, 0.45);
+}
+
+
+/* ============================== */
+/* ANNEAU DE PROGRESSION          */
+/* (signature : se remplit sur    */
+/* les 2s d'acquisition)          */
+/* ============================== */
+
+.ringWrap {
+  position: relative;
+
+  width: 40px;
+  height: 40px;
+
+  flex: none;
+}
+
+
+.ring {
+  width: 100%;
+  height: 100%;
+
+  transform: rotate(-90deg);
+}
+
+
+.ringTrack {
+  fill: none;
+
+  stroke: rgba(255, 255, 255, 0.10);
+
+  stroke-width: 3;
+}
+
+
+.ringProgress {
+  fill: none;
+
+  stroke: var(--state-idle);
+
+  stroke-width: 3;
+
+  stroke-linecap: round;
+
+  stroke-dasharray: 119.38;
+
+  stroke-dashoffset: 119.38;
+
+  transition: stroke-dashoffset 0.1s linear, stroke 0.25s ease;
+}
+
+
+.markerRow[data-state="measuring"] .ringProgress {
+  stroke: var(--state-measuring);
+}
+
+.markerRow[data-state="validated"] .ringProgress {
+  stroke: var(--state-validated);
+}
+
+.markerRow[data-state="error"] .ringProgress {
+  stroke: var(--state-error);
+}
+
+
+/* ============================== */
+/* CONTENU TEXTE D'UNE LIGNE      */
+/* ============================== */
+
+.markerInfo {
+  min-width: 0;
+}
+
+
+.markerHeader {
+  display: flex;
+
+  align-items: baseline;
+
+  gap: 8px;
+}
+
+
+.markerLabel {
+  font-weight: 600;
+
+  font-size: 14px;
+
+  letter-spacing: 0.01em;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+.markerId {
+  font-family: var(--font-mono);
+
+  font-size: 11px;
+
+  color: var(--ink-faint);
+
+  letter-spacing: 0.02em;
+}
+
+
+.markerStatus {
+  margin-top: 2px;
+
+  font-family: var(--font-mono);
+
+  font-size: 11px;
+
+  font-weight: 500;
+
+  letter-spacing: 0.09em;
+
+  color: var(--state-idle);
+}
+
+
+.markerRow[data-state="measuring"] .markerStatus {
+  color: var(--state-measuring);
+}
+
+.markerRow[data-state="validated"] .markerStatus {
+  color: var(--state-validated);
+}
+
+.markerRow[data-state="error"] .markerStatus {
+  color: var(--state-error);
+}
+
+
+.markerCoords {
+  margin-top: 3px;
+
+  font-family: var(--font-mono);
+
+  font-size: 11px;
+
+  color: var(--ink-dim);
+
+  white-space: pre;
+}
+
+
+/* ============================== */
+/* BOUTON DE DÉVERROUILLAGE       */
+/* (visible uniquement une fois   */
+/* le marqueur verrouillé)        */
+/* ============================== */
+
+.unlockBtn {
+  display: none;
+
+  flex: none;
+
+  width: 32px;
+  height: 32px;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: transparent;
+
+  border: 1px solid var(--panel-border-strong);
+
+  border-radius: 8px;
+
+  color: var(--ink-dim);
+
+  font-size: 16px;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+
+.markerRow[data-state="validated"] .unlockBtn {
+  display: flex;
+}
+
+
+.unlockBtn:hover {
+  color: var(--state-error);
+
+  border-color: var(--state-error);
+}
+
+
+.unlockBtn:active {
+  transform: scale(0.93);
+}
+
+
+/* ============================== */
+/* CONTROLES AUDIO                */
+/* ============================== */
+
+#audioControls {
+  position: absolute;
+
+  bottom: 34px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  display: flex;
+
+  gap: 12px;
+
+  z-index: 20;
+}
+
+
+/* ============================== */
+/* BOUTONS AUDIO                  */
+/* ============================== */
+
+#audioControls button {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 14px 26px;
+
+  background: var(--panel-bg);
+
+  border: 1px solid var(--panel-border-strong);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-radius: 12px;
+
+  color: var(--ink-dim);
+
+  cursor: pointer;
+
+  font-family: var(--font-display);
+
+  font-weight: 600;
+
+  font-size: 15px;
+
+  letter-spacing: 0.05em;
+
+  text-transform: uppercase;
+
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+
+#audioControls .btnIcon {
+  font-family: var(--font-mono);
+
+  font-size: 13px;
+}
+
+
+#listenButton.ready {
+  color: var(--state-validated);
+
+  border-color: var(--state-validated);
+}
+
+
+#stopButton.active {
+  color: var(--state-error);
+
+  border-color: var(--state-error);
+}
+
+
+#audioControls button:disabled {
+  cursor: default;
+
+  opacity: 0.4;
+
+  border-color: var(--panel-border);
+
+  color: var(--ink-faint);
+}
+
+
+#audioControls button:not(:disabled):active {
+  transform: scale(0.97);
+}
